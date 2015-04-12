@@ -7,7 +7,7 @@ docker build -t obigroup/cozy-couchdb .
 With fig :
 ```
 couchdb:
-    build: couchdb
+    image: obigroup/cozy-couchdb
 ```
 
 #More about updates
