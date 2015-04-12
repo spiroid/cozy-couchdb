@@ -9,21 +9,25 @@ RUN apt-get install -y \
     python-pip \
     wget \
     pwgen \
-    curl
+    curl \
+    && apt-get clean
+
+# Clean APT cache for a lighter image
+RUN rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
 RUN pip install supervisor
 
 # Create Cozy users, without home directories.
-RUN useradd -M cozy
+RUN useradd -M cozy \
+&& useradd -M cozy-data-system
 
 # Configure CouchDB
-RUN mkdir /usr/local/cozy
 RUN mkdir /etc/cozy \
-&& chown -hR cozy /etc/cozy
-RUN pwgen -1 > /etc/cozy/couchdb.login
-RUN pwgen -1 >> /etc/cozy/couchdb.login
-RUN chmod 640 /etc/cozy/couchdb.login
-RUN mkdir /var/run/couchdb \
+&& chown -hR cozy /etc/cozy \
+&& pwgen -1 > /etc/cozy/couchdb.login \
+&& pwgen -1 >> /etc/cozy/couchdb.login \
+&& chmod 640 /etc/cozy/couchdb.login \
+&& mkdir /var/run/couchdb \
 && chown -hR couchdb /var/run/couchdb \
 && su - couchdb -c 'couchdb -b' \
 && sleep 5 \
@@ -35,18 +39,15 @@ RUN printf "[httpd]\nport = 5984\nbind_address = 0.0.0.0\n" > /etc/couchdb/local
 # Configure Supervisor.
 ADD supervisor/supervisord.conf /etc/supervisord.conf
 RUN mkdir -p /var/log/supervisor \
-&& chmod 777 /var/log/supervisor \
+&& chmod 774 /var/log/supervisor \
 && /usr/local/bin/supervisord -c /etc/supervisord.conf
 
 # Import Supervisor configuration files.
 ADD supervisor/couchdb.conf /etc/supervisor/conf.d/couchdb.conf
 RUN chmod 0644 /etc/supervisor/conf.d/*
 
-# Clean APT cache for a lighter image
-RUN apt-get clean
-RUN rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
+# EXPOSE 5984
 
-EXPOSE 5984
-
-VOLUME ["/var/lib/couchdb", "/etc/cozy", "/usr/local/cozy", "/var/log/couchdb"]
+VOLUME ["/etc/cozy"]
+#"/usr/local/cozy""/var/lib/couchdb""/var/log/couchdb"
 CMD [ "/usr/local/bin/supervisord", "-n", "-c", "/etc/supervisord.conf" ]
