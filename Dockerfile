@@ -46,8 +46,11 @@ RUN mkdir -p /var/log/supervisor \
 ADD supervisor/couchdb.conf /etc/supervisor/conf.d/couchdb.conf
 RUN chmod 0644 /etc/supervisor/conf.d/*
 
+#Add file for backup/restore
+ADD sh/backup.sh /home/backup.sh
+ADD sh/restore.sh /home/restore.sh
+
 # EXPOSE 5984
 
 VOLUME ["/etc/cozy"]
-#"/usr/local/cozy""/var/lib/couchdb""/var/log/couchdb"
 CMD [ "/usr/local/bin/supervisord", "-n", "-c", "/etc/supervisord.conf" ]
