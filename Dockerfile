@@ -52,5 +52,5 @@ ADD sh/restore.sh /home/restore.sh
 
 # EXPOSE 5984
 
-VOLUME ["/etc/cozy"]
+VOLUME ["/etc/cozy", "/var/lib/couchdb/"]
 CMD [ "/usr/local/bin/supervisord", "-n", "-c", "/etc/supervisord.conf" ]
