@@ -28,11 +28,11 @@ RUN mkdir /etc/cozy \
 && pwgen -1 >> /etc/cozy/couchdb.login \
 && chmod 640 /etc/cozy/couchdb.login \
 && mkdir /var/run/couchdb \
-&& chown -hR couchdb /var/run/couchdb
-RUN su - couchdb -c 'couchdb -b'
-RUN sleep 5
-# RUN while ! curl -s 127.0.0.1:5984; do sleep 5; done
-RUN curl -s -X PUT 127.0.0.1:5984/_config/admins/$(head -n1 /etc/cozy/couchdb.login) -d "\"$(tail -n1 /etc/cozy/couchdb.login)\""
+&& chown -hR couchdb /var/run/couchdb \
+&& su - couchdb -c 'couchdb -b' \
+&& sleep 5 \
+&& while ! curl -s 127.0.0.1:5984; do sleep 5; done \
+&& curl -s -X PUT 127.0.0.1:5984/_config/admins/$(head -n1 /etc/cozy/couchdb.login) -d "\"$(tail -n1 /etc/cozy/couchdb.login)\""
 
 RUN printf "[httpd]\nport = 5984\nbind_address = 0.0.0.0\n" > /etc/couchdb/local.d/docker.ini
 
