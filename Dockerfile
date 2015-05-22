@@ -1,56 +1,46 @@
-FROM debian:latest
-MAINTAINER Rony Dray <contact@obigroup.fr>
+FROM debian:sid
+MAINTAINER Rony Dray <contact@obigroup.fr>, Jonathan Dray <jonathan.dray@gmail.com>
 
-RUN echo 'deb http://http.debian.net/debian wheezy main contrib non-free' >> /etc/apt/sources.list
+# Install packages
 RUN apt-get -y update
 RUN apt-get install -y \
     g++ \
     couchdb \
     python-pip \
     wget \
-    pwgen \
-    curl \
-    && apt-get clean
+    curl
 
 # Clean APT cache for a lighter image
-RUN rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
-
-RUN pip install supervisor
-
-# Create Cozy users, without home directories.
-RUN useradd -M cozy \
-&& useradd -M cozy-data-system
+RUN apt-get clean && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
 # Configure CouchDB
-RUN mkdir /etc/cozy \
-&& chown -hR cozy /etc/cozy \
-&& pwgen -1 > /etc/cozy/couchdb.login \
-&& pwgen -1 >> /etc/cozy/couchdb.login \
-&& chmod 640 /etc/cozy/couchdb.login \
-&& mkdir /var/run/couchdb \
-&& chown -hR couchdb /var/run/couchdb \
-&& su - couchdb -c 'couchdb -b' \
-&& sleep 5 \
-&& while ! curl -s 127.0.0.1:5984; do sleep 5; done \
-&& curl -s -X PUT 127.0.0.1:5984/_config/admins/$(head -n1 /etc/cozy/couchdb.login) -d "\"$(tail -n1 /etc/cozy/couchdb.login)\""
+RUN mkdir /var/run/couchdb && \
+    chown couchdb /var/run/couchdb
 
-RUN printf "[httpd]\nport = 5984\nbind_address = 0.0.0.0\n" > /etc/couchdb/local.d/docker.ini
+# Copy couch db configuration file for cozy cloud
+ADD couchdb/cozy.ini /etc/couchdb/local.d/cozy.ini
 
-# Configure Supervisor.
-ADD supervisor/supervisord.conf /etc/supervisord.conf
-RUN mkdir -p /var/log/supervisor \
-&& chmod 774 /var/log/supervisor \
-&& /usr/local/bin/supervisord -c /etc/supervisord.conf
-
-# Import Supervisor configuration files.
-ADD supervisor/couchdb.conf /etc/supervisor/conf.d/couchdb.conf
-RUN chmod 0644 /etc/supervisor/conf.d/*
+# Generate a random password for couch admin user
+RUN COUCH_PASSWD=`< /dev/urandom tr -dc _A-Z-a-z-0-9 | head -c${1:-32}`; \
+    echo $COUCH_PASSWD > /var/lib/couchdb/.passwd && \
+    sed -ir "s/<admin>/${COUCH_PASSWD}/g" /etc/couchdb/local.d/cozy.ini && \
+    chown couchdb /etc/couchdb/local.d/cozy.ini
 
 #Add file for backup/restore
-ADD sh/backup.sh /home/backup.sh
-ADD sh/restore.sh /home/restore.sh
+ADD sh/backup.sh /usr/local/bin/backup.sh
+ADD sh/restore.sh /usr/local/bin/restore.sh
 
-# EXPOSE 5984
+# Expose couch port to make it easier for other docker containers
+EXPOSE 5984
 
-VOLUME ["/etc/cozy", "/var/lib/couchdb/"]
-CMD [ "/usr/local/bin/supervisord", "-n", "-c", "/etc/supervisord.conf" ]
+# Default user when running the container
+USER couchdb
+
+# Configuration and data directories as volumes
+VOLUME ["/etc/couchdb/", "/var/lib/couchdb/"]
+
+# Setting config dir to couch main directory
+WORKDIR /var/lib/couchdb
+
+# Main command
+CMD ["/usr/bin/couchdb"]
