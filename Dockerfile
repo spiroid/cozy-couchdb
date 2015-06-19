@@ -1,6 +1,7 @@
 FROM debian:latest
 MAINTAINER Rony Dray <contact@obigroup.fr>, Jonathan Dray <jonathan.dray@gmail.com>
 
+RUN echo 'deb http://http.debian.net/debian wheezy main contrib non-free' >> /etc/apt/sources.list
 RUN apt-get -y update
 RUN apt-get install -y \
     g++ \
