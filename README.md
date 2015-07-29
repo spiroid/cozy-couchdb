@@ -1,16 +1,22 @@
 # Build:
+
 ```
-docker build -t obigroup/cozy-couchdb .
+docker build -t spiroid/cozy-couchdb .
 ```
+
 
 # Run:
-With fig :
+
+With docker-compose:
+
 ```
 couchdb:
-    image: obigroup/cozy-couchdb
+    image: spiroid/cozy-couchdb
 ```
 
-#More about updates
+
+# More about updates
+
 ```
 https://forum.cozy.io/t/deployer-cozy-avec-docker-et-des-containers-autonomes/468
 ```
