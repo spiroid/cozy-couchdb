@@ -1,17 +1,17 @@
+# Need a debian sid for now to get decent version of couchdb
 FROM debian:sid
 MAINTAINER Rony Dray <contact@obigroup.fr>, Jonathan Dray <jonathan.dray@gmail.com>
 
-RUN apt-get -y update
-RUN apt-get install -y \
+ENV DEBIAN_FRONTEND noninteractive
+
+RUN apt-get -y update && apt-get install --quiet --assume-yes --no-install-recommends \
     couchdb \
-    wget \
-    curl \
     && apt-get clean
 
 # Clean APT cache for a lighter image
 RUN rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
-# Create Cozy users, without home directories.
+# Create Cozy users, without home directories
 RUN useradd -M cozy \
 && useradd -M cozy-data-system
 
@@ -32,9 +32,6 @@ echo $COUCH_PASSWD >> /etc/cozy/couchdb.login \
 && mkdir /var/run/couchdb \
 && chown -hR couchdb /var/run/couchdb
 
-#Add file for backup/restore
-ADD sh/backup.sh /home/backup.sh
-ADD sh/restore.sh /home/restore.sh
 
 # Expose couch port to make it easier for other docker containers
 EXPOSE 5984
