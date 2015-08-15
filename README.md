@@ -45,7 +45,8 @@ replace $HOME by your actual home directory
 
 This configuration image was created to work with the following images:
 
-  * [cozy conf](https://github.com/spiroid/cozy-conf) 
+  * [cozy conf](https://github.com/spiroid/cozy-conf)
+  * [cozy couchdb data](https://github.com/spiroid/cozy-couchdb-data) 
   * [cozy controller](https://github.com/spiroid/cozy-controller)
   * [cozy data indexer](https://github.com/spiroid/cozy-data-indexer)
   
