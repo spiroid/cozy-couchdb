@@ -40,6 +40,17 @@ couchdb:
 
 replace $HOME by your actual home directory
 
+
+## Related images
+
+This configuration image was created to work with the following images:
+
+  * [cozy conf](https://github.com/spiroid/cozy-conf) 
+  * [cozy controller](https://github.com/spiroid/cozy-controller)
+  * [cozy data indexer](https://github.com/spiroid/cozy-data-indexer)
+  
+
+
 ## Inspirations
 
  * https://forum.cozy.io/t/deployer-cozy-avec-docker-et-des-containers-autonomes/468
