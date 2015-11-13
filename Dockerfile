@@ -19,10 +19,13 @@ RUN useradd -M cozy
 RUN mkdir /var/run/couchdb \
 && chown -hR couchdb /var/run/couchdb
 
+# forward request and error logs to docker log collector
+RUN ln -sf /dev/stdout /var/log/couchdb/couchdb.log
+
 # Expose couch port to make it easier for other docker containers
 EXPOSE 5984
 
-VOLUME ["/var/lib/couchdb/", "/var/log/couchdb"]
+VOLUME ["/var/lib/couchdb/"]
 
 # Setting config dir to couch main directory
 WORKDIR /var/lib/couchdb
