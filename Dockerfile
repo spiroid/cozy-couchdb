@@ -1,6 +1,6 @@
 # Need a debian sid for now to get decent version of couchdb
 FROM debian:sid
-MAINTAINER Rony Dray <contact@obigroup.fr>, Jonathan Dray <jonathan.dray@gmail.com>
+MAINTAINER Jonathan Dray <jonathan.dray@gmail.com>
 
 ENV DEBIAN_FRONTEND noninteractive
 
@@ -11,13 +11,16 @@ RUN apt-get -y update && apt-get install --quiet --assume-yes --no-install-recom
 # Clean APT cache for a lighter image
 RUN rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
-# Create Cozy users, without home directories
-# Create user early to avoid uid / gid issues
-RUN useradd -M cozy
+# Add cozy specific configuration file
+ADD cozy.ini /etc/couchdb/local.d/cozy.ini
 
-# Generate a random login and password for couchdb
+# Container entry point
+COPY docker-entrypoint.sh /usr/local/bin/
+
+# Fix directories & permissions
 RUN mkdir /var/run/couchdb \
-&& chown -hR couchdb /var/run/couchdb
+&& chown -hR couchdb /var/run/couchdb \
+&& chown couchdb /etc/couchdb/local.d/cozy.ini
 
 # Expose couch port to make it easier for other docker containers
 EXPOSE 5984
@@ -27,6 +30,8 @@ VOLUME ["/var/lib/couchdb/", "/var/log/couchdb"]
 # Setting config dir to couch main directory
 WORKDIR /var/lib/couchdb
 
+ENTRYPOINT ["/usr/local/bin/docker-entrypoint.sh"]
+
 # Default user when running the container
 USER couchdb
-CMD ["/usr/bin/couchdb"]
+CMD ["couchdb"]
