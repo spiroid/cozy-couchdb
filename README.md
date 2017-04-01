@@ -1,3 +1,9 @@
+# @Deprecated
+
+This docker image is not maintained anymore, and shouldn't be used.
+Please have a look at [that cozy repository](https://github.com/spiroid/cozy/tree/refactor-compose-v2) that
+is based on a standard couchdb docker image instead.
+
 # Cozy couchdb
 
 Couchdb image for the [cozy cloud](https://cozy.io) stack
