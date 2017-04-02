@@ -4,6 +4,10 @@ MAINTAINER Rony Dray <contact@obigroup.fr>, Jonathan Dray <jonathan.dray@gmail.c
 
 ENV DEBIAN_FRONTEND noninteractive
 
+# Add debian stable repository to apt source list
+# This is required to be able to fetch all couchdb dependencies
+RUN echo "deb http://httpredir.debian.org/debian/ stable main" > /etc/apt/sources.list.d/debian-stable.list
+
 RUN apt-get -y update && apt-get install --quiet --assume-yes --no-install-recommends \
     couchdb \
     && apt-get clean
